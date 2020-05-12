@@ -4,8 +4,6 @@ namespace Anton;
 class Jobber {
 
     public function run(){
-        // trigger new jobs
-
         $filename = 'storage/jobber.json';
         if(!file_exists($filename)){
             file_put_contents($filename, '[]');
@@ -15,18 +13,23 @@ class Jobber {
 
         if(count($jobs) > 0){
             foreach ($jobs as $key => $value) {
+                echo 'run: '.$value['name']. ' - '. $value['pipeline'].PHP_EOL;
                 $this->executeJob($value['name'], $value['pipeline']);
             }
+
+            file_put_contents($filename, '[]');
         }
         else{
             echo 'No jobs found. '.PHP_EOL;
-        }        
-
-        echo 'Jobber run. '.PHP_EOL;
+        }
     }
 
-    public function executeJob(){
-        exec('./anton.sh trigger ms-tracking production');
+    public function executeJob(string $name, string $pipeline){
+        if(empty($name) || empty($pipeline)){
+            throw new \Exception('Project Name or Pipeline empty');
+        }
+
+        exec('./anton.sh trigger '.$name.' '.$pipeline);
     }
 
     public function getJobs(){
